@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A&amp;D Employee Portal</title>
+<meta name="theme-color" content="#005FE0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="A&amp;D Portal">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@700&family=Lato:wght@400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; height:100%; background:#005FE0; overflow:hidden; }
+  body { padding-top:env(safe-area-inset-top); box-sizing:border-box; font-family:'Lato',Arial,sans-serif; }
+  #portal { position:absolute; top:env(safe-area-inset-top); left:0; right:0; bottom:0; width:100%; height:calc(100% - env(safe-area-inset-top)); border:0; background:#F9F9F9; }
+  #splash { position:fixed; inset:0; background:#F9F9F9; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:5; transition:opacity .35s; }
+  #splash img { width:62vw; max-width:260px; }
+  #splash .name { font-family:'Raleway',Arial,sans-serif; font-weight:700; font-size:20px; color:#282828; margin-top:18px; }
+  #splash .sub { font-size:12px; letter-spacing:3px; text-transform:uppercase; color:#6b6f76; margin-top:6px; }
+  #splash .bar { width:140px; height:4px; background:#e3e8f2; border-radius:4px; overflow:hidden; margin-top:28px; }
+  #splash .bar i { display:block; width:40%; height:100%; background:#005FE0; border-radius:4px; animation:run 1.1s ease-in-out infinite; }
+  #splash .note { font-size:13px; color:#6b6f76; margin-top:18px; min-height:18px; text-align:center; padding:0 24px; }
+  #splash button { display:none; margin-top:14px; background:#005FE0; color:#fff; border:0; border-radius:6px; padding:11px 22px; font-size:15px; font-weight:700; }
+  #splash.gone { opacity:0; pointer-events:none; }
+  @keyframes run { 0% { transform:translateX(-100%); } 100% { transform:translateX(260%); } }
+</style>
+</head>
+<body>
+<div id="splash">
+  <img src="logo.png" alt="A&amp;D Corporation">
+  <div class="name">Employee Portal</div>
+  <div class="sub">A&amp;D Artisan Foods</div>
+  <div class="bar"><i></i></div>
+  <div class="note" id="note"></div>
+  <button id="retry" onclick="boot()">Try again</button>
+</div>
+<iframe id="portal" title="A&amp;D Employee Portal" allow="clipboard-write"></iframe>
+<script>
+var EXEC = 'https://script.google.com/macros/s/AKfycbzfno6dVwc1_Wb8Xp85pjkyh_LCp8-0bctvmxuORTFKmh8R01XZUeWbrtbl6L9fuWRWBQ/exec';
+var EXTRA = '&t=1';
+var STORE = 'ad_portal_app_token';
+var frame = document.getElementById('portal');
+var splash = document.getElementById('splash');
+function token(){ try { return localStorage.getItem(STORE) || ''; } catch (e) { return ''; } }
+function keep(t){ try { t ? localStorage.setItem(STORE, t) : localStorage.removeItem(STORE); } catch (e) {} }
+function startUrl(){
+  var t = token();
+  return /^S[0-9a-f]{40}$/.test(t) ? EXEC + '?k=' + t + '&view=home&app=1' + EXTRA : EXEC + '?app=1' + EXTRA;
+}
+function show(url){
+  splash.classList.remove('gone');
+  document.getElementById('note').textContent = '';
+  document.getElementById('retry').style.display = 'none';
+  frame.src = url;
+}
+function boot(){
+  if (!navigator.onLine) {
+    document.getElementById('note').textContent = 'No internet connection. Connect to WiFi or data, then try again.';
+    document.getElementById('retry').style.display = 'inline-block';
+    return;
+  }
+  show(startUrl());
+}
+frame.addEventListener('load', function(){ setTimeout(function(){ splash.classList.add('gone'); }, 900); });
+window.addEventListener('message', function(ev){
+  if (!/^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/.test(ev.origin)) return;
+  var m = ev.data || {};
+  if (!m.adPortal) return;
+  if (m.type === 'token' && /^S[0-9a-f]{40}$/.test(m.token || '')) keep(m.token);
+  if (m.type === 'signout') keep('');
+  if (m.type === 'nav' && typeof m.url === 'string' && m.url.indexOf(EXEC + '?') === 0) {
+    var u = m.url.indexOf('app=1') > -1 ? m.url : m.url + '&app=1';
+    show(u);
+  }
+});
+window.addEventListener('online', function(){ if (!frame.src) boot(); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+boot();
+</script>
+</body>
+</html>
