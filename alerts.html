@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>PABAON Order Alerts</title>
+<style>
+:root{--red:#C8102E;--ink:#0F0F0F;--mute:#6f6a5e;--paper:#FAF9F6;--line:#ece7da}
+body{margin:0;background:var(--paper);color:var(--ink);font:500 15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.w{max-width:480px;margin:0 auto;padding:24px 16px}
+h1{color:var(--red);font-size:24px;margin:0 0 6px}
+p{color:var(--mute);margin:0 0 16px}
+a.b{display:block;text-align:center;text-decoration:none;font-weight:800;font-size:16px;border-radius:14px;padding:16px;margin-bottom:12px}
+a.on{background:var(--red);color:#fff}
+a.get{background:#fff;color:var(--ink);border:1px solid var(--line)}
+ol{padding-left:18px;color:var(--mute);font-size:14px}
+</style></head><body><div class="w">
+<h1>PABAON order alerts</h1>
+<p>Makes this phone ring with the PABAON voice on every new website order, even when locked. For the A&amp;D owners only. Android phones.</p>
+<a class="b on" id="on" href="#">Turn on order alerts</a>
+<a class="b get" href="ad-portal.apk">Get the latest A&amp;D Portal app (version 1.0.2)</a>
+<ol>
+<li>Tap Turn on order alerts. If the app has not been updated yet, the download starts instead. Install it, then come back and tap again.</li>
+<li>Allow notifications.</li>
+<li>When asked about battery, tap Allow so alerts are never late.</li>
+<li>Tap Test the sound. You should hear the PABAON voice.</li>
+</ol>
+</div>
+<script>
+var t = (location.hash.match(/t=([A-Za-z0-9_-]{8,64})/) || [])[1] || '';
+var fb = encodeURIComponent(location.origin + '/ad-portal.apk');
+document.getElementById('on').onclick = function(e){
+  e.preventDefault();
+  if (!t) { alert('Open this page from the Order Center so it carries the alert code.'); return; }
+  location.href = 'intent://setup?t=' + t + '#Intent;scheme=pabaonalerts;package=com.adartisanfoods.portal;S.browser_fallback_url=' + fb + ';end';
+};
+</script>
+</body></html>
